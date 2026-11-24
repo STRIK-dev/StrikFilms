@@ -23,6 +23,7 @@ export default function Profile(){
     {msg&&<p className="mt-2 text-sm">{msg}</p>}
     <button className="btn mt-3 w-full text-red-300" onClick={()=>setDlg('reset')}>Видалити всі дані</button>
     <p className="mt-6 text-xs leading-relaxed text-mute">Дані зберігаються лише в цьому браузері на цьому пристрої. Очищення сховища браузера або інший телефон — і списки зникнуть, якщо не зробити експорт.</p>
+    <p className="mt-8 pb-4 text-center text-[10px] font-medium uppercase tracking-[.24em] text-mute/60">Designed &amp; made by STRIK</p>
     {dlg==='reset'&&<Confirm text="Видалити всі особисті дані? Це неможливо скасувати." ok="Видалити" no="Скасувати" onNo={()=>setDlg('')} onOk={()=>{reset();setDlg('')}}/>}
     {dlg==='import'&&<Confirm text="Імпорт замінить усі поточні дані. Продовжити?" ok="Імпортувати" no="Скасувати" onNo={()=>setDlg('')} onOk={()=>{replace(pending.current);setDlg('');setMsg('Дані імпортовано.')}}/>}
   </div>;

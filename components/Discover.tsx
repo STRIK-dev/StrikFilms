@@ -106,11 +106,10 @@ export default function Discover(){
       {cur&&<div className="absolute inset-0 scale-150 bg-cover bg-center opacity-80 blur-2xl transition-[background-image] duration-500" style={{backgroundImage:`url(${img(cur.poster_path,'w185')})`}}/>}
       <div className="relative h-[120px]">
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 390 120" preserveAspectRatio="none"><path d="M0 120V90C0 70 15 62 38 62H92C133 62 118 24 164 24H356C375 24 390 39 390 58V120Z" fill="#0c0c0d"/></svg>
-        <p className="absolute inset-x-0 top-0 z-10 mx-auto w-fit max-w-[85%] truncate rounded-full border border-white/20 bg-black/35 px-4 py-0.5 text-center text-xs font-medium tracking-wide text-bone/90 shadow-md shadow-black/20 backdrop-blur-md">{s.name?`Привіт, ${s.name} 🍿`:'Добірка для тебе'}</p>
         <button onClick={openF} className="absolute left-9 top-[32px] text-sm font-semibold text-bone/90">Жанри{s.genres.length?` · ${s.genres.length}`:''}</button>
         <button onClick={()=>setPanel('s')} className="absolute right-9 top-[32px] text-sm font-semibold"><ArrowUpDown size={13} className="mr-1 inline"/>{sortLabel}</button>
       </div></header>
-    <div className="relative isolate mx-5 mt-[68px] h-[clamp(250px,calc(100dvh-430px),520px)]">
+    <div className="relative isolate mx-5 mt-10 h-[clamp(320px,calc(100dvh-330px),520px)]">
       {[3,2,1].map(i=>cards[i]&&<div key={cards[i].id} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px] bg-panel shadow-xl transition-transform duration-500" style={{transform:`translateY(${-i*24}px) scale(${1-i*.04})`,zIndex:4-i}}>
         <img src={img(cards[i].poster_path,'w500')} alt="" loading="eager" decoding="async" className="h-full w-full object-cover brightness-[.48]"/></div>)}
       {cur?<motion.div key={cur.id} className="absolute inset-0 z-10 touch-pan-y overflow-hidden rounded-[28px] bg-panel shadow-2xl" style={{x,rotate:rot}} animate={ctl} drag="x" dragSnapToOrigin dragElastic={.9}
@@ -140,6 +139,7 @@ export default function Discover(){
         <BookmarkPlus size={18} strokeWidth={1.8}/><span className="text-[11px]">Пізніше</span>
       </button>
     </div>
+    <p className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 z-20 max-w-[85vw] -translate-x-1/2 truncate rounded-full border border-white/20 bg-black/75 px-4 py-1 text-center text-xs font-medium tracking-wide text-bone shadow-lg shadow-black/30 backdrop-blur-md">{s.name?`Привіт, ${s.name} 🍿`:'Добірка для тебе'}</p>
     {confirm&&cur&&<Confirm text="Додати цей фільм у «Дивитись пізніше»?" ok="Додати" onNo={()=>setConfirm(false)} onOk={()=>{addLater(cur);setConfirm(false)}}/>}
     {banConfirm&&cur&&<Confirm text={`Більше не показувати «${cur.title}» у рекомендаціях?`} ok="Заблокувати" no="Скасувати" onNo={()=>setBanConfirm(false)} onOk={()=>{hide(cur);setBanConfirm(false)}}/>}
     {open&&<Details movie={open} onClose={()=>setOpen(null)}/>}

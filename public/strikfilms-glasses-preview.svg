@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="3D movie glasses on black">
+  <defs>
+    <linearGradient id="frame" x1="0" y1="0" x2="0.85" y2="1">
+      <stop stop-color="#fff"/><stop offset=".5" stop-color="#dedede"/><stop offset="1" stop-color="#929292"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#78fff0"/><stop offset="1" stop-color="#00aebc"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ff7279"/><stop offset="1" stop-color="#e51f3a"/>
+    </linearGradient>
+    <filter id="glow" x="-.4" y="-.4" width="1.8" height="1.8">
+      <feGaussianBlur stdDeviation="12" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0.05  0 1 0 0 0.1  0 0 1 0 0.12  0 0 0 .32 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#050505"/>
+  <rect x="9" y="9" width="494" height="494" rx="104" fill="none" stroke="#252525" stroke-width="5"/>
+  <g filter="url(#glow)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- temple arms -->
+    <path d="M108 218 60 184q-10-7-18 2-8 10 0 20l55 51" fill="none" stroke="#111" stroke-width="25"/>
+    <path d="M108 218 60 184q-10-7-18 2-8 10 0 20l55 51" fill="none" stroke="url(#frame)" stroke-width="14"/>
+    <path d="m404 218 48-34q10-7 18 2 8 10 0 20l-55 51" fill="none" stroke="#111" stroke-width="25"/>
+    <path d="m404 218 48-34q10-7 18 2 8 10 0 20l-55 51" fill="none" stroke="url(#frame)" stroke-width="14"/>
+    <!-- outer silhouette -->
+    <path d="M111 194q-12-2-17 10l-15 42q-8 23 8 41l49 54q11 12 29 12h70q19 0 29-16l24-39 24 39q10 16 29 16h70q18 0 29-12l49-54q16-18 8-41l-15-42q-5-12-17-10l-111 16q-24 4-42 22l-24 25-24-25q-18-18-42-22z" fill="#000" stroke="#111" stroke-width="30"/>
+    <path d="M111 194q-12-2-17 10l-15 42q-8 23 8 41l49 54q11 12 29 12h70q19 0 29-16l24-39 24 39q10 16 29 16h70q18 0 29-12l49-54q16-18 8-41l-15-42q-5-12-17-10l-111 16q-24 4-42 22l-24 25-24-25q-18-18-42-22z" fill="none" stroke="url(#frame)" stroke-width="17"/>
+    <!-- lenses -->
+    <path d="m106 214 97 14q21 3 37 19l24 25-28 45q-5 8-15 8h-57q-9 0-15-7l-45-49q-8-9-4-20z" fill="url(#cyan)" stroke="#101010" stroke-width="10"/>
+    <path d="m406 214-97 14q-21 3-37 19l-24 25 28 45q5 8 15 8h57q9 0 15-7l45-49q8-9 4-20z" fill="url(#red)" stroke="#101010" stroke-width="10"/>
+    <!-- lens highlights -->
+    <path d="m108 225 68 10-36 55-28-30q-7-8-4-17z" fill="#eaffff" opacity=".48" stroke="none"/>
+    <path d="m404 225-68 10 36 55 28-30q7-8 4-17z" fill="#fff0f0" opacity=".38" stroke="none"/>
+    <!-- nose bridge -->
+    <path d="M231 225q25-14 50 0" fill="none" stroke="url(#frame)" stroke-width="13"/>
+  </g>
+</svg>

@@ -108,8 +108,9 @@ export default function Discover(){
         <svg className="absolute inset-0 h-full w-full" viewBox="0 0 390 120" preserveAspectRatio="none"><path d="M0 120V90C0 70 15 62 38 62H92C133 62 118 24 164 24H356C375 24 390 39 390 58V120Z" fill="#0c0c0d"/></svg>
         <button onClick={openF} className="absolute left-9 top-[32px] text-sm font-semibold text-bone/90">Жанри{s.genres.length?` · ${s.genres.length}`:''}</button>
         <button onClick={()=>setPanel('s')} className="absolute right-9 top-[32px] text-sm font-semibold"><ArrowUpDown size={13} className="mr-1 inline"/>{sortLabel}</button>
+        <p className="absolute inset-x-0 top-[72px] z-10 mx-auto w-fit max-w-[85%] truncate rounded-full border border-white/20 bg-black/65 px-3 py-0.5 text-center text-xs font-medium tracking-wide text-bone shadow-md shadow-black/25 backdrop-blur-md">{s.name?`Привіт, ${s.name} 🍿`:'Добірка для тебе'}</p>
       </div></header>
-    <div className="relative isolate mx-5 mt-10 h-[clamp(320px,calc(100dvh-330px),520px)]">
+    <div className="relative isolate mx-5 mt-8 h-[clamp(300px,calc(100dvh-350px),500px)]">
       {[3,2,1].map(i=>cards[i]&&<div key={cards[i].id} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px] bg-panel shadow-xl transition-transform duration-500" style={{transform:`translateY(${-i*24}px) scale(${1-i*.04})`,zIndex:4-i}}>
         <img src={img(cards[i].poster_path,'w500')} alt="" loading="eager" decoding="async" className="h-full w-full object-cover brightness-[.48]"/></div>)}
       {cur?<motion.div key={cur.id} className="absolute inset-0 z-10 touch-pan-y overflow-hidden rounded-[28px] bg-panel shadow-2xl" style={{x,rotate:rot}} animate={ctl} drag="x" dragSnapToOrigin dragElastic={.9}
@@ -127,19 +128,18 @@ export default function Discover(){
           <p className="mt-1 text-xs text-bone/70">{genreNames(cur).slice(0,3).join(', ')}</p></div>
       </motion.div>:<div className="absolute inset-0 grid place-items-center rounded-[28px] bg-panel text-center">{err?<div><p>Не вдалося завантажити фільми.</p><button className="btn btn-w mt-3" onClick={load}>Спробувати ще</button></div>:loading?<div className="h-full w-full animate-pulse rounded-[28px] bg-white/5"/>:<div className="px-6"><p>За цими фільтрами збігів не знайдено.</p><button className="btn btn-g mt-3" onClick={()=>setPanel('f')}>Змінити фільтри</button></div>}</div>}
     </div>
-    <p className="mt-3 text-center text-xs text-mute">← свайп: пропустити · свайп →: дивитись пізніше</p>
-    <div className="mt-2 flex items-center justify-center gap-8 px-4">
-      <button className="flex min-w-0 flex-col items-center gap-1 py-1 text-mute transition hover:text-bone active:scale-95 disabled:opacity-40" onClick={skip} disabled={!cur}>
-        <X size={18} strokeWidth={1.8}/><span className="text-[11px]">Пропустити</span>
+    <p className="mt-2 text-center text-[11px] text-mute">← свайп: пропустити · свайп →: дивитись пізніше</p>
+    <div className="mt-1 flex items-center justify-center gap-8 px-4">
+      <button className="flex min-w-0 flex-col items-center gap-0.5 py-0.5 text-mute transition hover:text-bone active:scale-95 disabled:opacity-40" onClick={skip} disabled={!cur}>
+        <X size={17} strokeWidth={1.8}/><span className="text-[10px]">Пропустити</span>
       </button>
-      <button className="flex min-w-0 flex-col items-center gap-1 py-1 text-mute transition hover:text-bone active:scale-95 disabled:opacity-40" onClick={()=>setBanConfirm(true)} disabled={!cur}>
-        <EyeOff size={18} strokeWidth={1.8}/><span className="text-[11px]">Не показувати</span>
+      <button className="flex min-w-0 flex-col items-center gap-0.5 py-0.5 text-mute transition hover:text-bone active:scale-95 disabled:opacity-40" onClick={()=>setBanConfirm(true)} disabled={!cur}>
+        <EyeOff size={17} strokeWidth={1.8}/><span className="text-[10px]">Не показувати</span>
       </button>
-      <button className="flex min-w-0 flex-col items-center gap-1 py-1 text-bone/85 transition hover:text-white active:scale-95 disabled:opacity-40" onClick={later} disabled={!cur}>
-        <BookmarkPlus size={18} strokeWidth={1.8}/><span className="text-[11px]">Пізніше</span>
+      <button className="flex min-w-0 flex-col items-center gap-0.5 py-0.5 text-bone/85 transition hover:text-white active:scale-95 disabled:opacity-40" onClick={later} disabled={!cur}>
+        <BookmarkPlus size={17} strokeWidth={1.8}/><span className="text-[10px]">Пізніше</span>
       </button>
     </div>
-    <p className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom))] left-1/2 z-20 max-w-[85vw] -translate-x-1/2 truncate rounded-full border border-white/20 bg-black/75 px-4 py-1 text-center text-xs font-medium tracking-wide text-bone shadow-lg shadow-black/30 backdrop-blur-md">{s.name?`Привіт, ${s.name} 🍿`:'Добірка для тебе'}</p>
     {confirm&&cur&&<Confirm text="Додати цей фільм у «Дивитись пізніше»?" ok="Додати" onNo={()=>setConfirm(false)} onOk={()=>{addLater(cur);setConfirm(false)}}/>}
     {banConfirm&&cur&&<Confirm text={`Більше не показувати «${cur.title}» у рекомендаціях?`} ok="Заблокувати" no="Скасувати" onNo={()=>setBanConfirm(false)} onOk={()=>{hide(cur);setBanConfirm(false)}}/>}
     {open&&<Details movie={open} onClose={()=>setOpen(null)}/>}

@@ -35,7 +35,7 @@ export default function Home(){
     <main className={t==='discover'?'h-dvh overflow-hidden':'min-h-dvh pb-28'}>
     <div className={t==='discover'?'':'hidden'}><Discover/></div>
     {t==='search'&&<Search/>}{t==='later'&&<ListScreen kind="later"/>}{t==='watched'&&<ListScreen kind="watched"/>}{t==='me'&&<Profile/>}
-    <nav className="glass fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex -translate-x-1/2 gap-0.5 rounded-full bg-black/75 p-1.5 shadow-2xl">
-      {tabs.map(([k,l,Ic])=><button key={k} aria-label={l} onClick={()=>setT(k)} className={`flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs transition-all ${t===k?'bg-white/12 font-semibold text-bone':'text-mute'}`}><Ic size={19} strokeWidth={t===k?2.2:1.6}/>{t===k&&l}</button>)}</nav>
+    <nav className="glass fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex w-[min(92vw,380px)] -translate-x-1/2 items-center justify-between rounded-full bg-black/75 px-3 py-1.5 shadow-2xl">
+      {tabs.map(([k,l,Ic])=><button key={k} aria-label={l} onClick={()=>setT(k)} className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs transition-all ${t===k?'bg-white/12 font-semibold text-bone':'text-mute'}`}><Ic size={19} strokeWidth={t===k?2.2:1.6}/>{t===k&&l}</button>)}</nav>
   </main></Provider>;
 }

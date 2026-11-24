@@ -10,6 +10,19 @@ const SORTS:[Sort,string][]=[['random','Випадково'],['rating','Рейт
 const RANDOM_SORTS=['popularity.desc','vote_count.desc','revenue.desc','primary_release_date.desc'];
 const YEAR_ROW_HEIGHT=40;
 
+function minimumVotes(movie:Movie){
+  if(!movie.release_date)return 1501;
+  const released=new Date(`${movie.release_date}T00:00:00`);
+  if(Number.isNaN(released.getTime()))return 1501;
+  const now=new Date();
+  if(released.getFullYear()===now.getFullYear())return 10;
+  const oneYearAgo=new Date(now);oneYearAgo.setFullYear(now.getFullYear()-1);
+  if(released>=oneYearAgo)return 150;
+  const threeYearsAgo=new Date(now);threeYearsAgo.setFullYear(now.getFullYear()-3);
+  if(released>=threeYearsAgo)return 500;
+  return 1501;
+}
+
 function YearWheel({label,years,value,onChange}:{label:string;years:number[];value:number|null;onChange:(year:number|null)=>void}){
   const wheel=useRef<HTMLDivElement>(null);
   const options:(number|null)[]=[null,...years];
@@ -41,12 +54,13 @@ function YearWheel({label,years,value,onChange}:{label:string;years:number[];val
 }
 
 export default function Discover(){
-  const {s,set,addLater,hide}=useApp();
+  const {s,set,addLater,hide,markSkipped}=useApp();
   const [queue,setQueue]=useState<Movie[]>([]);const [err,setErr]=useState(false);const [loading,setLoading]=useState(true);
   const [open,setOpen]=useState<Movie|null>(null);const [confirm,setConfirm]=useState(false);const [banConfirm,setBanConfirm]=useState(false);const [panel,setPanel]=useState<''|'f'|'s'>('');const [draft,setDraft]=useState({g:[] as number[],so:false,yearFrom:null as number|null,yearTo:null as number|null});
   const busy=useRef(false),visited=useRef(new Set<number>()),total=useRef(500),page=useRef(s.page),mode=useRef<'and'|'or'>('and'),seen=useRef(new Set<number>()),cfg=useRef(s);cfg.current=s;
   const blocked=useCallback((id:number)=>[s.later,s.watched,s.hidden].some(l=>l.some(m=>m.id===id)),[s.later,s.watched,s.hidden]);
   const cards=queue.filter(m=>!blocked(m.id));const cur=cards[0];
+  useEffect(()=>{if(s.retry.length){const ids=new Set(s.retry.map(m=>m.id));setQueue(q=>[...s.retry,...q.filter(m=>!ids.has(m.id))]);set({retry:[]})}},[s.retry,set]);
   const load=useCallback(async()=>{
     if(busy.current)return;busy.current=true;setErr(false);
     try{
@@ -67,7 +81,7 @@ export default function Discover(){
         const q:Record<string,string|number>={include_adult:'false',page:p,
           sort_by:rnd?RANDOM_SORTS[Math.floor(Math.random()*RANDOM_SORTS.length)]:c.sort==='rating'?'vote_average.desc':c.sort==='rating-asc'?'vote_average.asc':c.sort==='year-desc'?'primary_release_date.desc':'primary_release_date.asc'};
         q['vote_average.gte']=0.1;
-        q['vote_count.gte']=2500;
+        q['vote_count.gte']=10;
         if(c.sonia)q['vote_average.lte']=6.5;
         if(c.yearFrom!==null)q['primary_release_date.gte']=`${c.yearFrom}-01-01`;
         if(c.yearTo!==null)q['primary_release_date.lte']=`${c.yearTo}-12-31`;
@@ -83,7 +97,7 @@ export default function Discover(){
             [results[i],results[j]]=[results[j],results[i]];
           }
         }
-        const fresh:Movie[]=results.filter((m:Movie)=>m.poster_path&&m.vote_average>0&&(m.vote_count||0)>=2500&&(!cfg.current.sonia||m.vote_average<=6.5)&&!seen.current.has(m.id));
+        const fresh:Movie[]=results.filter((m:Movie)=>m.poster_path&&m.vote_average>0&&(m.vote_count||0)>=minimumVotes(m)&&(!cfg.current.sonia||m.vote_average<=6.5)&&!seen.current.has(m.id));
         fresh.forEach(m=>seen.current.add(m.id));
         if(fresh.length){setQueue(x=>[...x,...fresh]);break}
       }
@@ -94,7 +108,7 @@ export default function Discover(){
   useEffect(()=>{if(prev.current!==key){prev.current=key;page.current=1;set({page:1});visited.current.clear();total.current=500;mode.current='and';seen.current.clear();setQueue([]);setLoading(true)}},[key,set]);
   useEffect(()=>{if(cards.length<6&&!busy.current)load()},[cards.length,key,load]);
   const x=useMotionValue(0),rot=useTransform(x,[-200,200],[-12,12]),skipO=useTransform(x,[-120,-20],[1,0]),laterO=useTransform(x,[20,120],[0,1]),ctl=useAnimation();
-  async function skip(){if(!cur)return;await ctl.start({x:-520,opacity:0,transition:{duration:.22}});setQueue(q=>q.filter(m=>m.id!==cur.id));ctl.set({x:0,opacity:1})}
+  async function skip(){if(!cur)return;await ctl.start({x:-520,opacity:0,transition:{duration:.22}});markSkipped(cur);setQueue(q=>q.filter(m=>m.id!==cur.id));ctl.set({x:0,opacity:1})}
   function later(){ctl.start({x:0,transition:{type:'spring',stiffness:400,damping:30}});setConfirm(true)}
   const sortLabel=SORTS.find(x=>x[0]===s.sort)![1];
   const openF=()=>{setDraft({g:s.genres,so:s.sonia,yearFrom:s.yearFrom,yearTo:s.yearTo});setPanel('f')};

@@ -1,0 +1,1 @@
+export default function manifest(){return{name:'StrikFilms',short_name:'StrikFilms',start_url:'/',display:'standalone' as const,background_color:'#0c0c0d',theme_color:'#0c0c0d',icons:[{src:'/icon.svg',type:'image/svg+xml',sizes:'any'}]}}

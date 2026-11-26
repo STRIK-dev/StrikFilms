@@ -1,6 +1,6 @@
 export async function GET(req:Request){
   const u=new URL(req.url);const path=u.searchParams.get('path')||'';
-  if(!/^\/(discover\/movie|search\/movie|movie\/\d+)$/.test(path))return Response.json({error:'bad path'},{status:400});
+  if(!/^\/(discover\/movie|search\/movie|movie\/\d+|collection\/\d+)$/.test(path))return Response.json({error:'bad path'},{status:400});
   const token=process.env.TMDB_TOKEN;
   if(!token)return Response.json({error:'TMDB_TOKEN is not configured. Add your TMDB API Read Access Token to .env.local and restart the app.'},{status:503});
   u.searchParams.delete('path');

@@ -1,13 +1,16 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {AnimatePresence,motion} from 'framer-motion';
-import {Clapperboard,Compass,Search as S,Bookmark,CheckCircle2,User} from 'lucide-react';
+import {Clapperboard,Compass,Search as S,Bookmark,CheckCircle2,User,ListOrdered,Gamepad2} from 'lucide-react';
 import {Provider} from '@/lib/store';
 import Discover from '@/components/Discover';
 import Search from '@/components/Search';
 import {ListScreen} from '@/components/Lists';
 import Profile from '@/components/Profile';
-const tabs=[['discover','Добірка',Compass],['search','Пошук',S],['later','Пізніше',Bookmark],['watched','Переглянуто',CheckCircle2],['me','Профіль',User]] as const;
+import SkippedDrawer from '@/components/SkippedDrawer';
+import Top100 from '@/components/Top100';
+import MiniGames from '@/components/MiniGames';
+const tabs=[['discover','Добірка',Compass],['top','Топ 100',ListOrdered],['games','Battles',Gamepad2],['search','Пошук',S],['later','Пізніше',Bookmark],['watched','Переглянуто',CheckCircle2],['me','Профіль',User]] as const;
 export default function Home(){
   const [t,setT]=useState<string>('discover');
   const [welcome,setWelcome]=useState(true);
@@ -34,8 +37,11 @@ export default function Home(){
     </motion.div>}</AnimatePresence>
     <main className={t==='discover'?'h-dvh overflow-hidden':'min-h-dvh pb-28'}>
     <div className={t==='discover'?'':'hidden'}><Discover/></div>
+    {t==='discover'&&<SkippedDrawer/>}
+    {t==='top'&&<Top100/>}
+    {t==='games'&&<MiniGames onSearch={()=>setT('search')} onDiscover={()=>setT('discover')}/>}
     {t==='search'&&<Search/>}{t==='later'&&<ListScreen kind="later"/>}{t==='watched'&&<ListScreen kind="watched"/>}{t==='me'&&<Profile/>}
-    <nav className="glass fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex w-[min(92vw,380px)] -translate-x-1/2 items-center justify-between rounded-full bg-black/75 px-3 py-1.5 shadow-2xl">
-      {tabs.map(([k,l,Ic])=><button key={k} aria-label={l} onClick={()=>setT(k)} className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs transition-all ${t===k?'bg-white/12 font-semibold text-bone':'text-mute'}`}><Ic size={19} strokeWidth={t===k?2.2:1.6}/>{t===k&&l}</button>)}</nav>
+    <nav className="glass fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-30 flex w-[min(96vw,480px)] -translate-x-1/2 items-center justify-between rounded-full bg-black/75 px-1.5 py-1.5 shadow-2xl">
+      {tabs.map(([k,l,Ic])=><button key={k} data-nav-item={k} aria-label={l} onClick={()=>setT(k)} className={`flex items-center gap-1.5 rounded-full px-2 py-2 text-xs transition-all ${t===k?'bg-white/12 font-semibold text-bone':'text-mute'}`}><Ic size={19} strokeWidth={t===k?2.2:1.6}/>{t===k&&l}</button>)}</nav>
   </main></Provider>;
 }

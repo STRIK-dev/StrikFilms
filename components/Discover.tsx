@@ -10,7 +10,14 @@ const SORTS:[Sort,string][]=[['random','Випадково'],['rating','Рейт
 const RANDOM_SORTS=['popularity.desc','vote_count.desc','revenue.desc','primary_release_date.desc'];
 const YEAR_ROW_HEIGHT=40;
 
-function minimumVotes(movie:Movie){
+function minimumVotes(movie:Movie,sort:Sort){
+  if(sort==='rating'||sort==='rating-asc'){
+    if(!movie.release_date)return 1501;
+    const released=new Date(`${movie.release_date}T00:00:00`);
+    if(Number.isNaN(released.getTime()))return 1501;
+    const twoYearsAgo=new Date();twoYearsAgo.setFullYear(twoYearsAgo.getFullYear()-2);
+    return released>=twoYearsAgo?2500:1501;
+  }
   if(!movie.release_date)return 1501;
   const released=new Date(`${movie.release_date}T00:00:00`);
   if(Number.isNaN(released.getTime()))return 1501;
@@ -81,9 +88,9 @@ export default function Discover(){
         const q:Record<string,string|number>={include_adult:'false',page:p,
           sort_by:rnd?RANDOM_SORTS[Math.floor(Math.random()*RANDOM_SORTS.length)]:c.sort==='rating'?'vote_average.desc':c.sort==='rating-asc'?'vote_average.asc':c.sort==='year-desc'?'primary_release_date.desc':'primary_release_date.asc'};
         q['vote_average.gte']=0.1;
-        q['vote_count.gte']=10;
+        q['vote_count.gte']=c.sort==='rating'||c.sort==='rating-asc'?1501:10;
+        q['primary_release_date.gte']=c.yearFrom!==null&&c.yearFrom>1989?`${c.yearFrom}-01-01`:'1989-01-01';
         if(c.sonia)q['vote_average.lte']=6.5;
-        if(c.yearFrom!==null)q['primary_release_date.gte']=`${c.yearFrom}-01-01`;
         if(c.yearTo!==null)q['primary_release_date.lte']=`${c.yearTo}-12-31`;
         if(c.genres.length)q.with_genres=c.genres.join(mode.current=== 'and'?',':'|');
         const d=await tmdb('/discover/movie',q);
@@ -97,7 +104,7 @@ export default function Discover(){
             [results[i],results[j]]=[results[j],results[i]];
           }
         }
-        const fresh:Movie[]=results.filter((m:Movie)=>m.poster_path&&m.vote_average>0&&(m.vote_count||0)>=minimumVotes(m)&&(!cfg.current.sonia||m.vote_average<=6.5)&&!seen.current.has(m.id));
+        const fresh:Movie[]=results.filter((m:Movie)=>m.poster_path&&m.vote_average>0&&(m.vote_count||0)>=minimumVotes(m,c.sort)&&(!cfg.current.sonia||m.vote_average<=6.5)&&!seen.current.has(m.id));
         fresh.forEach(m=>seen.current.add(m.id));
         if(fresh.length){setQueue(x=>[...x,...fresh]);break}
       }
@@ -109,6 +116,7 @@ export default function Discover(){
   useEffect(()=>{if(cards.length<6&&!busy.current)load()},[cards.length,key,load]);
   const x=useMotionValue(0),rot=useTransform(x,[-200,200],[-12,12]),skipO=useTransform(x,[-120,-20],[1,0]),laterO=useTransform(x,[20,120],[0,1]),ctl=useAnimation();
   async function skip(){if(!cur)return;await ctl.start({x:-520,opacity:0,transition:{duration:.22}});markSkipped(cur);setQueue(q=>q.filter(m=>m.id!==cur.id));ctl.set({x:0,opacity:1})}
+  async function advanceAfterGameAdd(){if(!cur)return;const id=cur.id;setOpen(null);await new Promise<void>(resolve=>window.setTimeout(resolve,70));const card=document.querySelector('[data-discover-card="true"]')?.getBoundingClientRect();const target=document.querySelector('[data-nav-item="games"]')?.getBoundingClientRect();const dx=card&&target?target.left+target.width/2-(card.left+card.width/2):0;const dy=card&&target?target.top+target.height/2-(card.top+card.height/2):180;await ctl.start({x:dx,y:dy,scale:.08,rotate:10,opacity:0,transition:{duration:.52,ease:[.22,.65,.32,1]}});setQueue(q=>q.filter(m=>m.id!==id));ctl.set({x:0,y:0,scale:1,rotate:0,opacity:1})}
   function later(){ctl.start({x:0,transition:{type:'spring',stiffness:400,damping:30}});setConfirm(true)}
   const sortLabel=SORTS.find(x=>x[0]===s.sort)![1];
   const openF=()=>{setDraft({g:s.genres,so:s.sonia,yearFrom:s.yearFrom,yearTo:s.yearTo});setPanel('f')};
@@ -127,7 +135,7 @@ export default function Discover(){
     <div className="relative isolate mx-5 mt-8 h-[clamp(300px,calc(100dvh-350px),500px)]">
       {[3,2,1].map(i=>cards[i]&&<div key={cards[i].id} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[28px] bg-panel shadow-xl transition-transform duration-500" style={{transform:`translateY(${-i*24}px) scale(${1-i*.04})`,zIndex:4-i}}>
         <img src={img(cards[i].poster_path,'w500')} alt="" loading="eager" decoding="async" className="h-full w-full object-cover brightness-[.48]"/></div>)}
-      {cur?<motion.div key={cur.id} className="absolute inset-0 z-10 touch-pan-y overflow-hidden rounded-[28px] bg-panel shadow-2xl" style={{x,rotate:rot}} animate={ctl} drag="x" dragSnapToOrigin dragElastic={.9}
+      {cur?<motion.div key={cur.id} data-discover-card="true" className="absolute inset-0 z-10 touch-pan-y overflow-hidden rounded-[28px] bg-panel shadow-2xl" style={{x,rotate:rot}} animate={ctl} drag="x" dragSnapToOrigin dragElastic={.9}
         initial={{scale:.95,opacity:0}} whileInView={{scale:1,opacity:1}}
         onDragEnd={(_,i)=>{if(i.offset.x<-110)skip();else if(i.offset.x>110)later()}}>
         <img src={img(cur.poster_path,'w500')} alt={cur.title} draggable={false} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-cover"/>
@@ -142,7 +150,7 @@ export default function Discover(){
           <p className="mt-1 text-xs text-bone/70">{genreNames(cur).slice(0,3).join(', ')}</p></div>
       </motion.div>:<div className="absolute inset-0 grid place-items-center rounded-[28px] bg-panel text-center">{err?<div><p>Не вдалося завантажити фільми.</p><button className="btn btn-w mt-3" onClick={load}>Спробувати ще</button></div>:loading?<div className="h-full w-full animate-pulse rounded-[28px] bg-white/5"/>:<div className="px-6"><p>За цими фільтрами збігів не знайдено.</p><button className="btn btn-g mt-3" onClick={()=>setPanel('f')}>Змінити фільтри</button></div>}</div>}
     </div>
-    <p className="mt-2 text-center text-[11px] text-mute">← свайп: пропустити · свайп →: дивитись пізніше</p>
+    <p className="mt-2 text-center text-[11px] text-mute">← пропустити ·  →   дивитись пізніше</p>
     <div className="mt-1 flex items-center justify-center gap-8 px-4">
       <button className="flex min-w-0 flex-col items-center gap-0.5 py-0.5 text-mute transition hover:text-bone active:scale-95 disabled:opacity-40" onClick={skip} disabled={!cur}>
         <X size={17} strokeWidth={1.8}/><span className="text-[10px]">Пропустити</span>
@@ -156,8 +164,8 @@ export default function Discover(){
     </div>
     {confirm&&cur&&<Confirm text="Додати цей фільм у «Дивитись пізніше»?" ok="Додати" onNo={()=>setConfirm(false)} onOk={()=>{addLater(cur);setConfirm(false)}}/>}
     {banConfirm&&cur&&<Confirm text={`Більше не показувати «${cur.title}» у рекомендаціях?`} ok="Заблокувати" no="Скасувати" onNo={()=>setBanConfirm(false)} onOk={()=>{hide(cur);setBanConfirm(false)}}/>}
-    {open&&<Details movie={open} onClose={()=>setOpen(null)}/>}
-    {panel==='s'&&<Sheet onClose={()=>setPanel('')}><p className="mb-3 text-lg font-bold">Сортування</p><div className="grid gap-2">{SORTS.map(([k,l])=><button key={k} className={`chip py-3 text-left ${s.sort===k?'on':''}`} onClick={()=>{set({sort:k});setPanel('')}}>{l}</button>)}</div></Sheet>}
+    {open&&<Details movie={open} onClose={()=>setOpen(null)} onAddToGame={advanceAfterGameAdd}/>}
+    {panel==='s'&&<Sheet onClose={()=>setPanel('')}><p className="mb-1 text-lg font-bold">Сортування</p><p className="mb-3 text-xs leading-relaxed text-mute">Для сортування за рейтингом враховуються лише фільми з достатньою кількістю оцінок: від 2&nbsp;500 для фільмів останніх двох років і від 1&nbsp;501 для старіших.</p><div className="grid gap-2">{SORTS.map(([k,l])=><button key={k} className={`chip py-3 text-left ${s.sort===k?'on':''}`} onClick={()=>{set({sort:k});setPanel('')}}>{l}</button>)}</div></Sheet>}
     {panel==='f'&&<Sheet onClose={()=>setPanel('')}><p className="mb-3 text-lg font-bold">Жанри</p>
       <div className="flex flex-wrap gap-2">{Object.entries(GENRES).map(([id,n])=>{const i=+id;return <button key={id} className={`chip ${draft.g.includes(i)?'on':''}`} onClick={()=>setDraft(d=>({...d,g:d.g.includes(i)?d.g.filter(v=>v!==i):[...d.g,i]}))}>{n}</button>})}</div>
       <h3 className="mb-2 mt-5 text-sm font-semibold text-mute">Роки виходу</h3>

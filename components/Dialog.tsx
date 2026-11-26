@@ -1,8 +1,14 @@
 'use client';
-import {ReactNode,useState} from 'react';
+import {ReactNode,useEffect,useState} from 'react';
+import {createPortal} from 'react-dom';
 export function Sheet({children,onClose,z=50}:{children:ReactNode;onClose:()=>void;z?:number}){
-  return <div className="fixed inset-0 flex items-end justify-center bg-black/70 md:items-center" style={{zIndex:z}} onClick={onClose}>
-    <div className="max-h-[90dvh] w-full max-w-md overflow-auto rounded-t-3xl bg-panel p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:rounded-3xl" onClick={e=>e.stopPropagation()}>{children}</div></div>;
+  useEffect(()=>{
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
+    return()=>{document.body.style.overflow=previousOverflow};
+  },[]);
+  return createPortal(<div className="fixed inset-0 flex items-center justify-center overflow-hidden overscroll-none bg-black/85 p-4" style={{zIndex:z,paddingTop:'max(1rem, env(safe-area-inset-top))',paddingBottom:'max(1rem, env(safe-area-inset-bottom))'}} onClick={onClose}>
+    <div className="max-h-full w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-panel p-5" onClick={e=>e.stopPropagation()}>{children}</div></div>,document.body);
 }
 export function Confirm({text,ok,no='Назад',onOk,onNo}:{text:string;ok:string;no?:string;onOk:()=>void;onNo:()=>void}){
   return <Sheet onClose={onNo} z={70}><p className="mb-5 text-lg font-semibold leading-snug">{text}</p>
